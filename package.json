@@ -1,5 +1,5 @@
 {
-  "name": "this-xys/libsignal-node",
+  "name": "libsignal-node",
   "version": "1.0.19",
   "description": "Open Whisper Systems' libsignal for Node.js",
   "main": "index.js",
