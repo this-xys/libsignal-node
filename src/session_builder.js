@@ -1,3 +1,4 @@
+
 'use strict';
 
 const BaseKeyType = require('./base_key_type');
@@ -70,7 +71,7 @@ class SessionBuilder {
         }   
         const existingOpenSession = record.getOpenSession();
         if (existingOpenSession) {
-            //console.warn("Closing open session in favor of incoming prekey bundle");
+            console.warn("Closing open session in favor of incoming prekey bundle");
             record.closeSession(existingOpenSession);
         }
         record.setSession(await this.initSession(false, preKeyPair, signedPreKeyPair,
