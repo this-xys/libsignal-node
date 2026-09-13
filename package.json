@@ -12,7 +12,7 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "@skidy89/libsignal-plugins": "^1.0.33",
+    "@skidy89/libsignal-plugins": "1.0.33",
     "curve25519-js": "^0.0.4",
     "protobufjs": "^7.5.5"
   },
