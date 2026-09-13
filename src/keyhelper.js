@@ -1,7 +1,5 @@
-// vim: ts=4:sw=4:expandtab
-
 const curve = require('./curve');
-const nodeCrypto = require('crypto');
+const rustCurve = require('@skidy89/libsignal-plugins');
 
 function isNonNegativeInteger(n) {
     return (typeof n === 'number' && (n % 1) === 0  && n >= 0);
@@ -10,8 +8,7 @@ function isNonNegativeInteger(n) {
 exports.generateIdentityKeyPair = curve.generateKeyPair;
 
 exports.generateRegistrationId = function() {
-    var registrationId = Uint16Array.from(nodeCrypto.randomBytes(2))[0];
-    return registrationId & 0x3fff;
+    return rustCurve.generateRegistrationId();
 };
 
 exports.generateSignedPreKey = function(identityKeyPair, signedKeyId) {

@@ -1,6 +1,4 @@
-
 'use strict';
-
 const BaseKeyType = require('./base_key_type');
 const ChainType = require('./chain_type');
 const SessionRecord = require('./session_record');
@@ -11,12 +9,10 @@ const queueJob = require('./queue_job');
 
 
 class SessionBuilder {
-
     constructor(storage, protocolAddress) {
         this.addr = protocolAddress;
         this.storage = storage;
     }
-
     async initOutgoing(device) {
         const fqAddr = this.addr.toString();
         return await queueJob(fqAddr, async () => {
@@ -24,14 +20,14 @@ class SessionBuilder {
                 throw new errors.UntrustedIdentityKeyError(this.addr.id, device.identityKey);
             }
             if (!curve.verifySignature(device.identityKey, device.signedPreKey.publicKey,
-                                  device.signedPreKey.signature)) {
+                                  device.signedPreKey.signature, false)) {
                 throw new Error("Invalid signature on device key");
             }
             const baseKey = curve.generateKeyPair();
             const devicePreKey = device.preKey && device.preKey.publicKey;
-            const session = await this.initSession(true, baseKey, undefined, device.identityKey,
-                                                   devicePreKey, device.signedPreKey.publicKey,
-                                                   device.registrationId);
+            const session = await this.initSession(true, baseKey, undefined, device.identityKey, 
+            devicePreKey, device.signedPreKey.publicKey,
+            device.registrationId);
             session.pendingPreKey = {
                 signedKeyId: device.signedPreKey.keyId,
                 baseKey: baseKey.pubKey
@@ -45,7 +41,6 @@ class SessionBuilder {
             } else {
                 const openSession = record.getOpenSession();
                 if (openSession) {
-                    // console.warn("Closing stale open session for new outgoing prekey bundle"); temporary fix
                     record.closeSession(openSession);
                 }
             }
@@ -53,14 +48,12 @@ class SessionBuilder {
             await this.storage.storeSession(fqAddr, record);
         });
     }
-
     async initIncoming(record, message) {
         const fqAddr = this.addr.toString();
         if (!await this.storage.isTrustedIdentity(fqAddr, message.identityKey)) {
             throw new errors.UntrustedIdentityKeyError(this.addr.id, message.identityKey);
         }
         if (record.getSession(message.baseKey)) {
-            // This just means we haven't replied.
             return;
         }
         const preKeyPair = await this.storage.loadPreKey(message.preKeyId);
@@ -73,17 +66,15 @@ class SessionBuilder {
         }   
         const existingOpenSession = record.getOpenSession();
         if (existingOpenSession) {
-            // console.warn("Closing open session in favor of incoming prekey bundle");
             record.closeSession(existingOpenSession);
         }
         record.setSession(await this.initSession(false, preKeyPair, signedPreKeyPair,
-                                                 message.identityKey, message.baseKey,
-                                                 undefined, message.registrationId));
+        message.identityKey, message.baseKey,
+        undefined, message.registrationId));
         return message.preKeyId;
     }
-
     async initSession(isInitiator, ourEphemeralKey, ourSignedKey, theirIdentityPubKey,
-                      theirEphemeralPubKey, theirSignedPubKey, registrationId) {
+    theirEphemeralPubKey, theirSignedPubKey, registrationId) {
         if (isInitiator) {
             if (ourSignedKey) {
                 throw new Error("Invalid call to initSession");
@@ -139,14 +130,10 @@ class SessionBuilder {
             closed: -1
         };
         if (isInitiator) {
-            // If we're initiating we go ahead and set our first sending ephemeral key now,
-            // otherwise we figure it out when we first maybeStepRatchet with the remote's
-            // ephemeral key
             this.calculateSendingRatchet(session, theirSignedPubKey);
         }
         return session;
     }
-
     calculateSendingRatchet(session, remoteKey) {
         const ratchet = session.currentRatchet;
         const sharedSecret = curve.calculateAgreement(remoteKey, ratchet.ephemeralKeyPair.privKey);
