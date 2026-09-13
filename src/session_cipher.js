@@ -10,7 +10,6 @@ const queueJob = require('./queue_job');
 const rustCurve = require('@skidy89/libsignal-plugins');
 
 const VERSION = 3;
-const MAX_MESSAGE_KEY_GAP = 500;
 function assertBuffer(value) {
     if (!(value instanceof Buffer)) {
         throw TypeError(`Expected Buffer instead of: ${value.constructor.name}`);
@@ -228,8 +227,8 @@ class SessionCipher {
         if (chain.chainKey.counter >= counter) {
             return;
         }
-        if (counter - chain.chainKey.counter > MAX_MESSAGE_KEY_GAP) {
-            throw new errors.SessionError(`Over ${MAX_MESSAGE_KEY_GAP} messages into the future!`);
+        if (counter - chain.chainKey.counter > 2000) {
+            throw new errors.SessionError('Over 2000 messages into the future!');
         }
         if (chain.chainKey.key === undefined) {
             throw new errors.SessionError('Chain closed');
