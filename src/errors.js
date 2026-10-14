@@ -1,4 +1,3 @@
-// vim: ts=4:sw=4:expandtab
 
 exports.SignalError = class SignalError extends Error {};
 

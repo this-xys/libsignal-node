@@ -1,4 +1,3 @@
-// vim: ts=4:sw=4
 
 const BaseKeyType = require('./base_key_type');
 
@@ -10,7 +9,6 @@ function assertBuffer(value) {
         throw new TypeError("Buffer required");
     }
 }
-
 
 class SessionEntry {
 
@@ -156,7 +154,6 @@ class SessionEntry {
 
 }
 
-
 const migrations = [{
     version: 'v1',
     migrate: function migrateV1(data) {
@@ -179,7 +176,6 @@ const migrations = [{
     }
 }];
 
-
 class SessionRecord {
 
     static createEntry() {
@@ -190,7 +186,6 @@ class SessionRecord {
         let run = (data.version === undefined);
         for (let i = 0; i < migrations.length; ++i) {
             if (run) {
-                // console.info("Migrating session to:", migrations[i].version);
                 migrations[i].migrate(data);
             } else if (migrations[i].version === data.version) {
                 run = true;
@@ -257,7 +252,6 @@ class SessionRecord {
     }
 
     getSessions() {
-        // Return sessions ordered with most recently used first.
         return Array.from(Object.values(this.sessions)).sort((a, b) => {
             const aUsed = a.indexInfo.used || 0;
             const bUsed = b.indexInfo.used || 0;
@@ -267,18 +261,14 @@ class SessionRecord {
 
     closeSession(session) {
         if (this.isClosed(session)) {
-            // console.warn("Session already closed", session);
             return;
         }
-        // console.info("Closing session:", session);
         session.indexInfo.closed = Date.now();
     }
 
     openSession(session) {
         if (!this.isClosed(session)) {
-            // console.warn("Session already open");
         }
-        // console.info("Opening session:", session);
         session.indexInfo.closed = -1;
     }
 
@@ -298,7 +288,6 @@ class SessionRecord {
                 }
             }
             if (oldestKey) {
-                // console.info("Removing old closed session:", oldestSession);
                 delete this.sessions[oldestKey];
             } else {
                 throw new Error('Corrupt sessions object');

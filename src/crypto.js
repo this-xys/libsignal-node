@@ -1,10 +1,8 @@
-// vim: ts=4:sw=4
 
 'use strict';
 
 const nodeCrypto = require('crypto');
 const assert = require('assert');
-
 
 function assertBuffer(value) {
     if (!(value instanceof Buffer)) {
@@ -12,7 +10,6 @@ function assertBuffer(value) {
     }
     return value;
 }
-
 
 function encrypt(key, data, iv) {
     assertBuffer(key);
@@ -22,7 +19,6 @@ function encrypt(key, data, iv) {
     return Buffer.concat([cipher.update(data), cipher.final()]);
 }
 
-
 function decrypt(key, data, iv) {
     assertBuffer(key);
     assertBuffer(data);
@@ -30,7 +26,6 @@ function decrypt(key, data, iv) {
     const decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, iv);
     return Buffer.concat([decipher.update(data), decipher.final()]);
 }
-
 
 function calculateMAC(key, data) {
     assertBuffer(key);
@@ -40,7 +35,6 @@ function calculateMAC(key, data) {
     return Buffer.from(hmac.digest());
 }
 
-
 function hash(data) {
     assertBuffer(data);
     const sha512 = nodeCrypto.createHash('sha512');
@@ -48,10 +42,7 @@ function hash(data) {
     return sha512.digest();
 }
 
-
-// Salts always end up being 32 bytes
 function deriveSecrets(input, salt, info, chunks) {
-    // Specific implementation of RFC 5869 that only returns the first 3 32-byte chunks
     assertBuffer(input);
     assertBuffer(salt);
     assertBuffer(info);
@@ -79,11 +70,20 @@ function deriveSecrets(input, salt, info, chunks) {
 }
 
 function verifyMAC(data, key, mac, length) {
-    const calculatedMac = calculateMAC(key, data).slice(0, length);
+    verifyMACParts([data], key, mac, length);
+}
+
+function verifyMACParts(parts, key, mac, length) {
+    assertBuffer(key);
+    const hmac = nodeCrypto.createHmac('sha256', key);
+    for (const part of parts) {
+        hmac.update(assertBuffer(part));
+    }
+    const calculatedMac = hmac.digest().subarray(0, length);
     if (mac.length !== length || calculatedMac.length !== length) {
         throw new Error("Bad MAC length");
     }
-    if (!mac.equals(calculatedMac)) {
+    if (!nodeCrypto.timingSafeEqual(mac, calculatedMac)) {
         throw new Error("Bad MAC");
     }
 }
@@ -94,5 +94,6 @@ module.exports = {
     encrypt,
     hash,
     calculateMAC,
-    verifyMAC
+    verifyMAC,
+    verifyMACParts
 };

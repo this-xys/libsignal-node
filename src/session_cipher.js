@@ -17,7 +17,6 @@ function assertBuffer(value) {
     return value;
 }
 
-
 class SessionCipher {
     constructor(storage, protocolAddress) {
         if (!(protocolAddress instanceof ProtocolAddress)) {

@@ -3,7 +3,6 @@ const crypto = require('./crypto.js');
 
 var VERSION = 0;
 
-
 async function iterateHash(data, key, count) {
     const combined = (new Uint8Array(Buffer.concat([data, key]))).buffer;
     const result = crypto.hash(combined);
@@ -13,7 +12,6 @@ async function iterateHash(data, key, count) {
         return iterateHash(result, key, count);
     }
 }
-
 
 function shortToArrayBuffer(number) {
     return new Uint16Array([number]).buffer;

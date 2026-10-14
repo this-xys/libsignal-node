@@ -12,6 +12,20 @@ export function encrypt(
 
 export function calculateMAC(key: Buffer, data: Uint8Array): Uint8Array;
 
+export function verifyMAC(
+  data: Buffer,
+  key: Buffer,
+  mac: Uint8Array,
+  length: number
+): void;
+
+export function verifyMACParts(
+  parts: Buffer[],
+  key: Buffer,
+  mac: Uint8Array,
+  length: number
+): void;
+
 export function deriveSecrets(
   key: Uint8Array,
   salt: Buffer,

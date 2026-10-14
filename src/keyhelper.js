@@ -31,12 +31,15 @@ exports.generateSignedPreKey = function(identityKeyPair, signedKeyId) {
 };
 
 exports.generatePreKey = function(keyId) {
-    if (!isNonNegativeInteger(keyId)) {
+    if (!isNonNegativeInteger(keyId) || keyId > 0xFFFFFFFF) {
         throw new TypeError('Invalid argument for keyId: ' + keyId);
     }
-    const keyPair = curve.generateKeyPair();
+    const preKey = rustCurve.generatePreKey(keyId);
     return {
-        keyId,
-        keyPair
+        keyId: preKey.keyId,
+        keyPair: {
+            pubKey: preKey.pubKey,
+            privKey: preKey.privKey
+        }
     };
 };
