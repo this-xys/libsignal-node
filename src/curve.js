@@ -2,10 +2,10 @@
 const rustCurve = require('@skidy89/libsignal-plugins');
 
 function validatePrivKey(privKey) {
-    if (privKey === undefined) {
+    if (privKey === undefined || privKey === null) {
         throw new Error("Undefined private key");
     }
-    if (!(privKey instanceof Buffer)) {
+    if (!(privKey instanceof Uint8Array)) {
         throw new Error(`Invalid private key type: ${privKey.constructor.name}`);
     }
     if (privKey.byteLength != 32) {
@@ -32,12 +32,7 @@ function validatePubKey(pubKey) {
 }
 
 exports.getPublicFromPrivateKey = function(privKey) {
-    if (!(privKey instanceof Uint8Array)) {
-        throw new Error(`Invalid private key type: ${privKey === undefined ? 'undefined' : privKey.constructor.name}`);
-    }
-    if (privKey.byteLength != 32) {
-        throw new Error(`Incorrect private key length: ${privKey.byteLength}`);
-    }
+    validatePrivKey(privKey);
     return rustCurve.keyPair(privKey).pubKey;
 };
 
